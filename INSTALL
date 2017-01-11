@@ -1,0 +1,51 @@
+WCPG library provides functions for a reliable evaluation of the Worst-Case Peak Gain matrix of a LTI filter. 
+
+In order to compile the software you will need the following packages
+installed:
+
+	- gcc
+	- g++
+	- gmp
+	- mpfr
+	- mpfi
+	- f2c 
+	- blas (install dev version in aperture)
+	- clapack (install dev version in aperture)
+	- libtool
+
+In order to configure, use the shell script file autogen.sh by invoking it using the
+following command:
+
+sh autogen
+
+Then, in order to compile, use the makefile by invoking it using the
+following command:
+
+./configure
+make
+
+The configure script coming with this distribution of WCPG supports
+several --with-*** switches. These switches, as usual, enable the libraries
+WCPG depends on to be installed in non-standard directories.
+Please use
+
+./configure --help
+
+to get an overview over the different switches.
+
+The WCPG library can be installed with command
+
+make install
+
+An example of a program, which uses libwcpg is build instantly with the library and can be invoked using
+a test program which is located in TestProgram using following interface:
+
+./testProgram filename.txt precision
+
+where precision is indicated in format 1e-X.
+
+For example,
+
+cd exampleProgram & ./exampleProgram examples/eigen_example.txt  1e-45
+
+After installation, library WCPG can be linked using -lwcpg.
