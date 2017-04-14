@@ -1609,12 +1609,22 @@ int checkTwoNorm(mpfr_t *reT, mpfr_t *imT, uint64_t n)
     mpfr_add(scratch3, absTii, gamma, MPFR_RNDU);
     mpfr_fma(absTgamma, alpha, alpha, scratch3, MPFR_RNDU);
 
-    // printf("\n Gershrogin check: \n");
-    // mpfr_out_str(stderr, 10, 100, absTgamma, MPFR_RNDU);
-
+    /*
+    fprintf(stderr, "\n Eigenvalue %d: \n\t\t Real part: ", i);
+    mpfr_out_str(stderr, 10, 100, reT[i * n + i], MPFR_RNDU);
+    fprintf(stderr, "\n Eigenvalue %d: \n\t\t Imag part: ", i);
+    mpfr_out_str(stderr, 10, 100, imT[i * n + i], MPFR_RNDU);
+    fprintf(stderr, "\n Eigenvalue %d: \n\t\t gamma:  ", i);
+    mpfr_out_str(stderr, 10, 100, gamma, MPFR_RNDU);
+    fprintf(stderr, "\n Eigenvalue %d: \n\t\t alpha:  ", i);
+    mpfr_out_str(stderr, 10, 100, alpha, MPFR_RNDU);
+     fprintf(stderr, "\n Gershrogin check: \n");
+     mpfr_out_str(stderr, 10, 100, absTgamma, MPFR_RNDU);
+*/
     if(mpfr_cmp_ui(absTgamma, (uint64_t)1) > 0) 
     {
-      fprintf(stderr,"Gershgorin's circle is larger than 1 \n ");
+      fprintf(stderr,"Gershgorin's circle is larger than 1! \n ");
+
       mpfr_clear(scratch);
       mpfr_clear(alpha);
       mpfr_clear(beta);
