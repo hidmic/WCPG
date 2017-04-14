@@ -1475,7 +1475,7 @@ int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n,
 
 	mpfr_t mpeps;
 	mpfr_init2(mpeps, 64);
-	mpfr_set_str(mpeps, "1e-54", 2, MPFR_RNDN);
+	mpfr_set_str(mpeps, "1e-53", 2, MPFR_RNDN);
 
 
 	if (!WCPG_ABCD_mprec(S, A, B, C, D, n, p, q, mpeps))
@@ -1503,12 +1503,133 @@ int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n,
 
 }
 
+/* 
+	This function computes the WCPG of a SISO filter represented with its transfer function.
+	The filter is specified as following:
+
+			sum_0^Nb b_i
+		H=	-------------
+			sum_0^Na a_i
+
+	We consider only the case, when Nb <= Na.
+	The order of the filter is equal then to fOrder = Na - 1
+	
+	In case of success, the function returns 1 and W contains the WCPG computed with double precision.
+	Otherwise, the function returns 0 and W contains a NaN.
+*/
+int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
+{
+	int i;
+
+	if(Nb > Na)
+	{
+		fprintf(stderr, "\nCannot compute the WCPG_tf: numerator order is greater than denumerator order.\nReminer: we do not consider coeffa[0]=1 implicitly.\nTansfer function format is\n\tsum_0^Nb coeffb_i\n  H=\t-----------------\n\tsum_0^Na coeffa_i\n \n");
+		//*W = -1;
+		return 0;
+	}
+
+	uint64_t fOrder = Na - 1;
+
+	double *a = wcpgSafeCalloc(Na, Na * sizeof(double));
+	if(denum[0] != (double)1)
+	{
+		a[0] = 1;
+		for(i=1; i < Na; ++i)
+		{
+			a[i] = denum[i]/denum[0];
+		}
+	}
+	else
+	{
+		for(i=0; i < Na; ++i)
+		{
+			a[i] = denum[i];
+		}
+	}
+
+	double *b = wcpgSafeCalloc(Na, Na * sizeof(double));
+	for(i=0; i < Nb; ++i)
+	{
+			b[i] = num[i];
+	}
+
+	uint64_t p = 1;			//number of outputs
+	uint64_t q = 1;			//number of inputs
+	uint64_t n = fOrder;	//number of states
+
+	double *A = (double*)wcpgSafeCalloc(n * n, n * n * sizeof(double));
+	double *B = (double*)wcpgSafeCalloc(n * q, n * q * sizeof(double));
+	double *C = (double*)wcpgSafeCalloc(p * n, p * n * sizeof(double));
+	double *D = (double*)wcpgSafeCalloc(p * q, p * q * sizeof(double));
+
+	// Computing matrix A
+
+	// first line is [-a[1]  ...  -a[Na]]
+	for(i = 0; i < n; ++i)
+	{
+		A[i] = -a[i+1];  
+	}
+	for(i = 1; i < n; ++i)
+	{
+		A[i * n + i - 1] = 1.0;	
+	}
+
+	// Matrix B
+	B[0] = 1;
+
+	//Matrix C
+	for(i = 0; i < n; ++i)
+	{
+		C[i] = b[i+1] - b[0]*a[i+1];
+	}
+
+	//Matrix D
+	D[0] = b[0];
+
+/*
+	printf("Matrix A: \n");
+	clapack_matrix_print_d(A, n, n);
+	printf("Matrix B: \n");
+	clapack_matrix_print_d(B, n, 1);
+	printf("Matrix C: \n");
+	clapack_matrix_print_d(C, 1, n);
+	printf("Matrix D: \n");
+	clapack_matrix_print_d(D, 1, 1);
+	printf("------> vector a: \n");
+	clapack_matrix_print_d(a, 1, Na);
+	printf("------> vector b: \n");
+	clapack_matrix_print_d(b, 1, Na);
+	*/ 
+	
+	if(!WCPG_ABCD(W, A, B, C, D, n, 1, 1))
+	{
+		wcpgSafeFree(a);
+		wcpgSafeFree(b);
+		wcpgSafeFree(A);
+		wcpgSafeFree(B);
+		wcpgSafeFree(C);
+		wcpgSafeFree(D);
+		return 0;
+	}
+	else
+	{
+		wcpgSafeFree(a);
+		wcpgSafeFree(b);
+		wcpgSafeFree(A);
+		wcpgSafeFree(B);
+		wcpgSafeFree(C);
+		wcpgSafeFree(D);
+		return 1;
+	}
+
+}
+
 
 
 /* Nth order LTI filter is represented by its transfer function numerator (array of size Nb) and
 denumerator (array of size Na), where N := max(Na, Nb).
 For such a filter, the function computes its WCPG */
-int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
+int WCPG_tf_initial(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
 {
 
 	// FIrst, we need to convert tf representation to state-space
@@ -1756,11 +1877,11 @@ int eigen(mpfr_t *re, mpfr_t *im, mpfr_t *reV, mpfr_t *imV, mpfr_t epsLambda, mp
 		{
 			complexdoubleToMPFRMatrix(re, im, eigv, 1, n);
 			maxInVector(epsLambda, eerrbnd, n);
-			fprintf(stderr, "WARNING: could not compute the eigenvalues and eigenvectors with MPFR solver. Used LAPACK instead. \n");
+			//fprintf(stderr, "WARNING: could not compute the eigenvalues and eigenvectors with MPFR solver. Used LAPACK instead. \n");
 		}
 		else
 		{
-			fprintf(stderr, "WARNING: could not compute the eigenvectors with MPFR solver. Used LAPACK instead. \n");
+			//fprintf(stderr, "WARNING: could not compute the eigenvectors with MPFR solver. Used LAPACK instead. \n");
 			mpfr_set_ui_2exp(epsLambda, (unsigned long int) 1, prec_result, MPFR_RNDN);
 		}
 
