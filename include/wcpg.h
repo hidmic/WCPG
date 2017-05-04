@@ -115,7 +115,7 @@ Input:
 Output:
 	integer value equal to 1 if WCPG computation is successful and 0 otherwise.
 */
-int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na);
+int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na, int oneIncluded);
 
 
 /* Compute the lower bound on the WCPG matrix of a LTI filter

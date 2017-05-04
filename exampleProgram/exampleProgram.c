@@ -227,7 +227,7 @@ int main(int argc, char *argv[] )
 	  q = 1;
 	  double *W2 = (double*)wcpgSafeMalloc(p * q * sizeof(double*));
 
-	  if (!WCPG_tf(W2, num, denum, 3, 2))
+	  if (!WCPG_tf(W2, num, denum, 3, 2, (int)0))
 	  	printf("Could not compute WCPG \n");
 	  else
 	  {

@@ -1505,11 +1505,17 @@ int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n,
 
 /* 
 	This function computes the WCPG of a SISO filter represented with its transfer function.
-	The filter is specified as following:
+	If parameter oneIncluded=1, then the filter is specified as following:
+
+			sum_0^Nb b_i
+		H=	-------------		with a_0=1
+			sum_0^Na a_i
+
+	If oneIncluded=0, then transfer function is 
 
 			sum_0^Nb b_i
 		H=	-------------
-			sum_0^Na a_i
+			1 + sum_1^Na a_i
 
 	We consider only the case, when Nb <= Na.
 	The order of the filter is equal then to fOrder = Na - 1
@@ -1517,35 +1523,31 @@ int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n,
 	In case of success, the function returns 1 and W contains the WCPG computed with double precision.
 	Otherwise, the function returns 0 and W contains a NaN.
 */
-int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
+int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na, int oneIncluded)
 {
 	int i;
+	double *a;
 
-	if(Nb > Na)
+	if(Nb > (Na + !oneIncluded) )
 	{
 		fprintf(stderr, "\nCannot compute the WCPG_tf: numerator order is greater than denumerator order.\nReminer: we do not consider coeffa[0]=1 implicitly.\nTansfer function format is\n\tsum_0^Nb coeffb_i\n  H=\t-----------------\n\tsum_0^Na coeffa_i\n \n");
-		//*W = -1;
 		return 0;
 	}
 
-	uint64_t fOrder = Na - 1;
-
-	double *a = wcpgSafeCalloc(Na, Na * sizeof(double));
-	if(denum[0] != (double)1)
+	if (oneIncluded == 0)
 	{
+		Na += 1;
+		a = wcpgSafeCalloc(Na, Na * sizeof(double));
 		a[0] = 1;
-		for(i=1; i < Na; ++i)
-		{
-			a[i] = denum[i]/denum[0];
-		}
+		for(i=1; i < Na; ++i)	a[i] = denum[i-1];
 	}
 	else
 	{
-		for(i=0; i < Na; ++i)
-		{
-			a[i] = denum[i];
-		}
+		a = wcpgSafeCalloc(Na, Na * sizeof(double));
+		for(i=0; i < Na; ++i)	a[i] = denum[i];
 	}
+	
+	
 
 	double *b = wcpgSafeCalloc(Na, Na * sizeof(double));
 	for(i=0; i < Nb; ++i)
@@ -1553,6 +1555,7 @@ int WCPG_tf(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
 			b[i] = num[i];
 	}
 
+	uint64_t fOrder = Na - 1;
 	uint64_t p = 1;			//number of outputs
 	uint64_t q = 1;			//number of inputs
 	uint64_t n = fOrder;	//number of states
