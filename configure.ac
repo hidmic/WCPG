@@ -178,7 +178,7 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SO_LIB_PATH"
 # Checks for header files.
 ###############################################################################
 AC_CHECK_HEADER_STDBOOL
-AC_CHECK_HEADERS([string.h float.h sys/time.h ])
+AC_CHECK_HEADERS([string.h float.h sys/time.h limits.h])
 AC_CHECK_HEADERS([f2c.h],[AC_DEFINE([F2C_HEADER], [1], [Define to 1 if f2c.h found])],[AC_MSG_ERROR(No f2c.h header found)])
 AC_CHECK_HEADERS([mpfr.h],[],[AC_MSG_ERROR(No mpfr.h header found)])
 AC_CHECK_HEADERS([mpfi.h],[],[AC_MSG_ERROR(No mpfi.h header found)])

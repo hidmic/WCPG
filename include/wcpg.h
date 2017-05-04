@@ -58,6 +58,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <limits.h>
 #include <mpfr.h>
 
 /** @brief For an LTI filter given in its State-Space representation {A,B,C,D},
