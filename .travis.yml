@@ -40,7 +40,7 @@ install:
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
-  - LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH;
+  - DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH;
   # install required python packages for build and coverage
   - pip install pytest
   - pip install pytest-cov
