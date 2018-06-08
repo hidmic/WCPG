@@ -7,8 +7,6 @@ from setuptools import setup, find_packages
 import os
 import codecs
 here = os.path.abspath(os.path.dirname(__file__))
-print(here)
-print([f for f in os.listdir(here)])
 with codecs.open('README.rst', encoding='utf-8') as f:
 	long_description = f.read()
 
@@ -35,7 +33,7 @@ setup(
 	],
 	keywords='worst-case peak gain, WCPG',
 	packages=find_packages(exclude=['tests']),
-	install_requires=['pytest', 'pytest-cov', 'coveralls', 'ctypes', 'numpy'],
+	install_requires=['pytest', 'pytest-cov', 'coveralls', 'numpy'],
 	project_urls={
 		'Bug Reports': 'https://github.com/FiXiF/WCPG/issues',
 		'Source': 'https://github.com/FiXiF/WCPG/',
