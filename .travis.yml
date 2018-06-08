@@ -17,7 +17,7 @@ matrix:
 
 before_install:
 # install WCPG library
-    - ./autogen.sh && ./configure && make -j&& sudo make install;
+    - sh autogen.sh && ./configure && make -j&& sudo make install;
 # install required python packages for build and coverage
     - pip install pytest pytest-cov
     - pip install coveralls
