@@ -17,27 +17,27 @@ matrix:
 before_install:
   # update apt-get or install python 3.6
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo apt-get -qq update;
+      sudo apt-get -qq update || travis_terminate 1;
     else
-      brew update;
-      brew upgrade python;
-      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH;
+      brew update || travis_terminate 1;
+      brew upgrade python || travis_terminate 1;
+      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH || travis_terminate 1;
     fi
 
 install:
   # install the prerequisites
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo apt-get install f2c;
-      sudo apt-get install libmpfr-dev;
-      sudo apt-get install libmpfi-dev;
+      sudo apt-get install f2c || travis_terminate 1;
+      sudo apt-get install libmpfr-dev || travis_terminate 1;
+      sudo apt-get install libmpfi-dev || travis_terminate 1;
       sudo apt-get build-dep python-scipy || travis_terminate 1;
     else
-      brew install mpfi;
-       pip install numpy || travis_terminate 1;
+      brew install mpfi || travis_terminate 1;
+      pip install numpy || travis_terminate 1;
       brew install gcc || brew link --overwrite gcc;
     fi
   # install WCPG library
-  - sh autogen.sh && ./configure && make -j&& sudo make install; cd ..;
+  - sh autogen.sh && ./configure && make -j&& sudo make install;
   # install required python packages for build and coverage
   - pip install pytest
   - pip install pytest-cov
