@@ -19,11 +19,11 @@ import ctypes
 from numpy import empty, float64, mat
 
 # check if the WCPG library is installed
-if not ctypes.util.find_library('WCPG'):
+if not ctypes.util.find_library('wcpg'):
 	raise ValueError("The WCPG library cannot be found (is it installed?")
 
 #
-_WCPGlib = ctypes.CDLL(ctypes.util.find_library('WCPG'))
+_WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
 
 # int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
 _WCPGfunABCD = _WCPGlib.WCPG_ABCD
