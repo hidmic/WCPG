@@ -1,5 +1,77 @@
 language: python
 
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+
+cache: pip
+
+matrix:
+  include:
+    - os: osx
+      language: generic
+      python: "3.6"
+
+before_install:
+  # update apt-get or install python 3.6
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo apt-get -qq update;
+    else
+      brew update;
+      brew upgrade python;
+      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH;
+    fi
+
+install:
+  # install the prerequisites
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo apt-get install libmpfr-dev;
+      sudo apt-get install libmpfi-dev;
+      sudo apt-get build-dep python-scipy || travis_terminate 1;
+    else
+      brew install mpfi;
+       pip install numpy || travis_terminate 1;
+      brew install gcc || brew link --overwrite gcc;
+    fi
+  # install WCPG library
+  - ./autogen.sh && ./configure && make -j&& sudo make install; cd ..;
+  # install required python packages for build and coverage
+  - pip install pytest
+  - pip install pytest-cov
+  - pip install coveralls
+  # and then install WCPG wrapper
+  - python setup.py  install
+
+script:
+    - pytest -k construct --cov=fixif -s
+
+notifications:
+email: false
+
+after_success:
+    # run coveralls for Python 3.6 under linux with Sollya and Slycot installed
+    - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6"  && "$TRAVIS_OS_NAME" == "linux" ]]; then
+          coveralls;
+      fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+language: python
+
 matrix:
   include:
 #    - python: 2.6
@@ -16,6 +88,10 @@ matrix:
       env: TOXENV=py37
 
 before_install:
+    - sudo apt-get update
+# install dependency for WCPG
+    - sudo apt-get install f2c
+
 # install WCPG library
     - sh autogen.sh && ./configure && make -j&& sudo make install;
 # install required python packages for build and coverage
