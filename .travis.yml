@@ -16,12 +16,14 @@ matrix:
       env: TOXENV=py37
 
 before_install:
-# install WCPG
+# install WCPG library
+    - ./autogen.sh && ./configure && make -j&& sudo make install;
 # install required python packages for build and coverage
     - pip install pytest pytest-cov
     - pip install coveralls
 
-install: pip install tox
+install:
+    - pip install tox
 
 script:
     - tox
