@@ -27,6 +27,7 @@ before_install:
 install:
   # install the prerequisites
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      sudo apt-get install f2c;
       sudo apt-get install libmpfr-dev;
       sudo apt-get install libmpfi-dev;
       sudo apt-get build-dep python-scipy || travis_terminate 1;
@@ -36,7 +37,7 @@ install:
       brew install gcc || brew link --overwrite gcc;
     fi
   # install WCPG library
-  - ./autogen.sh && ./configure && make -j&& sudo make install; cd ..;
+  - sh autogen.sh && ./configure && make -j&& sudo make install; cd ..;
   # install required python packages for build and coverage
   - pip install pytest
   - pip install pytest-cov
@@ -53,61 +54,5 @@ email: false
 after_success:
     # run coveralls for Python 3.6 under linux with Sollya and Slycot installed
     - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6"  && "$TRAVIS_OS_NAME" == "linux" ]]; then
-          coveralls;
-      fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-language: python
-
-matrix:
-  include:
-#    - python: 2.6
-#      env: TOXENV=py26
-    - python: 2.7
-      env: TOXENV=py27
-    - python: 3.4
-      env: TOXENV=py34
-    - python: 3.5
-      env: TOXENV=py35
-    - python: 3.6
-      env: TOXENV=py36
-    - python: 3.7-dev
-      env: TOXENV=py37
-
-before_install:
-    - sudo apt-get update
-# install dependency for WCPG
-    - sudo apt-get install f2c
-
-# install WCPG library
-    - sh autogen.sh && ./configure && make -j&& sudo make install;
-# install required python packages for build and coverage
-    - pip install pytest pytest-cov
-    - pip install coveralls
-
-install:
-    - pip install tox
-
-script:
-    - tox
-
-notifications:
-email: false
-
-after_success:
-    - if [[ $TOXENV == py36 ]]; then
           coveralls;
       fi
