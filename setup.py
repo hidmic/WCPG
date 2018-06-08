@@ -7,6 +7,8 @@ from setuptools import setup, find_packages
 import os
 import codecs
 here = os.path.abspath(os.path.dirname(__file__))
+print(here)
+print([f for f in os.listdir(here)])
 with codecs.open('README.rst', encoding='utf-8') as f:
 	long_description = f.read()
 
