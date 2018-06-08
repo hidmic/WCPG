@@ -35,6 +35,7 @@ install:
       brew install mpfi || travis_terminate 1;
       pip install numpy || travis_terminate 1;
       brew install gcc || brew link --overwrite gcc;
+      brew install f2c || travis_terminate 1;
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
@@ -42,7 +43,6 @@ install:
   - pip install pytest
   - pip install pytest-cov
   - pip install coveralls
-  - pip install --upgrade urllib3
   # and then install WCPG wrapper
   - python setup.py  install
 
