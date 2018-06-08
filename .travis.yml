@@ -43,6 +43,7 @@ install:
   - pip install pytest
   - pip install pytest-cov
   - pip install coveralls
+  - pip install 'urllib3==1.21' --force-reinstall
   # and then install WCPG wrapper
   - python setup.py  install
 
