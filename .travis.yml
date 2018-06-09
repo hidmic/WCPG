@@ -22,7 +22,6 @@ before_install:
     else
       brew update || travis_terminate 1;
       brew upgrade python || travis_terminate 1;
-
       PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH || travis_terminate 1;
     fi
 
@@ -43,7 +42,7 @@ install:
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
-  - LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH;
+  - export export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib;
   # install required python packages for build and coverage
   - pip install pytest
   - pip install pytest-cov
