@@ -26,7 +26,7 @@ if not ctypes.util.find_library('wcpg'):
 try:
 	_WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
 except:
-	_WCPGlib = ctypes.CDLL('libwcpg')
+	_WCPGlib = ctypes.CDLL('libwcpg.so')
 
 # int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
 _WCPGfunABCD = _WCPGlib.WCPG_ABCD
