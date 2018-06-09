@@ -22,6 +22,7 @@ before_install:
     else
       brew update || travis_terminate 1;
       brew upgrade python || travis_terminate 1;
+
       PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH || travis_terminate 1;
     fi
 
@@ -35,12 +36,12 @@ install:
     else
       brew install mpfi || travis_terminate 1;
       pip install numpy || travis_terminate 1;
-      brew install gcc || brew link --overwrite gcc;
+      brew install gcc || travis_terminate 1;
+      brew link --overwrite gcc;
       brew install f2c || travis_terminate 1;
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
-  - DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH;
   # install required python packages for build and coverage
   - pip install pytest
   - pip install pytest-cov

@@ -23,8 +23,10 @@ if not ctypes.util.find_library('wcpg'):
 	raise ValueError("The WCPG library cannot be found (is it installed?")
 
 #
-print(ctypes.util.find_library('wcpg'))
-_WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
+try:
+	_WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
+except:
+	_WCPGlib = ctypes.CDLL('libwcpg')
 
 # int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
 _WCPGfunABCD = _WCPGlib.WCPG_ABCD
