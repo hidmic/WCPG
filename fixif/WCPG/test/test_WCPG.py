@@ -49,13 +49,6 @@ def random_ABCD(n, p, q, pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDze
 
 	Returns a four numpy matrices A,B,C,D
 	"""
-	# Check for valid input arguments.
-	if n < 1 or n % 1:
-		raise ValueError("states must be a positive integer.  #states = %g." % n)
-	if q < 1 or q % 1:
-		raise ValueError("inputs must be a positive integer.  #inputs = %g." % q)
-	if p < 1 or p % 1:
-		raise ValueError("outputs must be a positive integer.  #outputs = %g." % p)
 
 	# Make some poles for A.  Preallocate a complex array.
 	poles = zeros(n) + zeros(n) * 0.j
@@ -147,54 +140,14 @@ def random_ABCD(n, p, q, pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDze
 	return (A, B, C, D)
 
 
-def iter_random_ABCD(number, stable=True, n=(5, 10), p=(1, 5), q=(1, 5), pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDzero=0.5):
+def iter_random_ABCD(number, n=(5, 10), p=(1, 5), q=(1, 5), pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDzero=0.5):
 	"""
-	Generate some n-th order random (stable or not) state-spaces, with q inputs and p outputs
-	copy/Adapted from control-python library (thanks guys): https://sourceforge.net/projects/python-control/
-	possibly already adpated from Mathworks or Octave
-
-	Parameters:
-		- number: number of state-space to generate
-		- stable: indicate if the state-spaces are stable or not
-		- n: tuple (mini,maxi) number of states (default:  random between 5 and 10)
-		- p: 1 or a tuple (mini,maxi) number of outputs (default: 1)
-		- q: 1 or a tuple (mini,maxi) number of inputs (default: 1)
-
-		- pRepeat: Probability of repeating a previous root (default: 0.01)
-		- pReal: Probability of choosing a real root (default: 0.5). Note that when choosing a complex root,
-		the conjugate gets chosen as well. So the expected proportion of real roots is pReal / (pReal + 2 * (1 - pReal))
-		- pBCmask: Probability that an element in B or C will not be masked out (default: 0.9)
-		- pDmask: Probability that an element in D will not be masked out (default: 0.8)
-		- pDzero: Probability that D = 0 (default: 0.5)
-
+	Generate some n-th order random (stable) state-spaces, with q inputs and p outputs
 	Returns:
 		- returns a generator of numpy matrices (A,B,C,D)  (to use in a for loop for example)
-
-	..Example::
-		>>> sys = list( iter_random_ABCD( 12, True, (10,20)) )
-		>>> for S in iter_random_ABCD( 12, True, (10,20)):
-		>>>		print( S )
-
-
 	"""
 	for i in range(number):
-		if stable:
-			yield random_ABCD(randint(*n), randint(*p), randint(*q), pRepeat, pReal, pBCmask, pDmask, pDzero)
-		else:
-			# random for the size
-			nn = randint(*n)
-			if p == 1 and q == 1:
-				pp = 1
-				qq = 1
-			else:
-				pp = randint(*p)
-				qq = randint(*q)
-			# generate random matrices with appropriate sizes
-			A = mat(rand(nn, nn))
-			B = mat(rand(nn, qq))
-			C = mat(rand(pp, nn))
-			D = mat(rand(pp, qq))
-			yield (A, B, C, D)
+		yield random_ABCD(randint(*n), randint(*p), randint(*q), pRepeat, pReal, pBCmask, pDmask, pDzero)
 
 
 def WCPG_approx(A, B, C, D, nit):
@@ -212,14 +165,14 @@ def WCPG_approx(A, B, C, D, nit):
 	return sum
 
 
-@pytest.mark.parametrize( "S", iter_random_ABCD(10, True, (5, 10), (1, 5), (1, 5), pBCmask=0.1))
+@pytest.mark.parametrize( "S", iter_random_ABCD(100, (5, 30), (1, 5), (1, 5), pBCmask=0.1))
 def test_WCPG (S):
 	"""
 	Tests for Worst-Case Peak Gain computation
 	Compare with a simple and bad approximation
 	"""
 	nit = 5000
-	rel_tol_wcpg = 1e-5
+	rel_tol_wcpg = 1e-3
 
 	A,B,C,D = S
 	W = WCPG_ABCD(A, B, C, D)
