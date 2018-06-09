@@ -52,7 +52,7 @@ install:
   - python setup.py  install
 
 script:
-    - pytest --cov=fixif -s
+    - pytest --cov=fixif.WCPG -s
 
 notifications:
 email: false
