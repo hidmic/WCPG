@@ -38,7 +38,7 @@ install:
       pip install numpy || travis_terminate 1;
       brew install gcc || travis_terminate 1;
       brew link --overwrite gcc;
-      brew install f2c || travis_terminate 1;
+      wget "http://hpc.sourceforge.net/buildf2c"; sh buildf2c;
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
