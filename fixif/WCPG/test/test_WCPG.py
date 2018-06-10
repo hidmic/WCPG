@@ -165,7 +165,7 @@ def WCPG_approx(A, B, C, D, nit):
 	return sum
 
 
-@pytest.mark.parametrize( "S", iter_random_ABCD(100, (5, 30), (1, 5), (1, 5), pBCmask=0.1))
+@pytest.mark.parametrize( "S", iter_random_ABCD(20, (5, 30), (1, 5), (1, 5), pBCmask=0.1))
 def test_WCPG (S):
 	"""
 	Tests for Worst-Case Peak Gain computation
