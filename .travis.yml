@@ -38,7 +38,8 @@ install:
       pip install numpy;
       brew install gcc || brew link --overwrite gcc;
       brew tap homebrew/boneyard;
-      brew install f2c;
+      wget http://hpc.sourceforge.net/buildf2c;
+      sh buildf2c;
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
