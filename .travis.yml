@@ -20,9 +20,9 @@ before_install:
       sudo apt-get -qq update || travis_terminate 1;
       pip install --upgrade setuptools;
     else
-      brew update || travis_terminate 1;
-      brew upgrade python || travis_terminate 1;
-      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH || travis_terminate 1;
+      brew update;
+      brew upgrade python;
+      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH;
     fi
 
 install:
@@ -33,10 +33,9 @@ install:
       sudo apt-get install libmpfi-dev || travis_terminate 1;
       sudo apt-get build-dep python-scipy || travis_terminate 1;
     else
-      brew install mpfi || travis_terminate 1;
-      pip install numpy || travis_terminate 1;
-      brew install gcc || travis_terminate 1;
-      brew link --overwrite gcc || travis_terminate 1;
+      brew install mpfi;
+      pip install numpy;
+      brew install gcc || brew link --overwrite gcc;
       brew tap homebrew/boneyard;
       brew install f2c;
     fi
