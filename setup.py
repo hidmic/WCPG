@@ -33,7 +33,7 @@ setup(
 	],
 	keywords='worst-case peak gain, WCPG',
 	packages=find_packages(exclude=['tests']),
-	install_requires=['pytest', 'pytest-cov', 'coveralls', 'numpy'],
+	install_requires=['pytest', 'pytest-cov', 'coveralls', 'numpy', 'scipy'],   # packages only used for testing
 	project_urls={
 		'Bug Reports': 'https://github.com/FiXiF/WCPG/issues',
 		'Source': 'https://github.com/FiXiF/WCPG/',

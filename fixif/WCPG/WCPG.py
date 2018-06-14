@@ -24,15 +24,20 @@ if not ctypes.util.find_library('wcpg'):
 	raise ValueError("The WCPG library cannot be found (is it installed?")
 _WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
 
+
+# -- WCPG_ABCD --
+# compute the WCPG from state-space matrices
 # int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
 _WCPGfunABCD = _WCPGlib.WCPG_ABCD
 _WCPGfunABCD.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,))
+
+
 def WCPG_ABCD(A, B, C, D):
 	"""Compute the WCPG from the matrices A, B, C, D
 	A,B,C and D are numpy matrices or array of the right size"""
 	# get the sizes
 	n = A.shape[1]
-	p,q = D.shape
+	p, q = D.shape
 	# get the pointer to the double arrays
 	pA = A.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	pB = B.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
@@ -47,14 +52,29 @@ def WCPG_ABCD(A, B, C, D):
 	return mat(W)
 
 
-
-
+# -- WCPG_TF --
+# compute the WCPG from transfer function coefficients
 # int WCPG_tf_initial(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
 _WCPGfunTF = _WCPGlib.WCPG_tf_initial
 _WCPGfunTF.argtypes = (3 * (ctypes.POINTER(ctypes.c_double),) + 2 * (ctypes.c_uint64,))
+
+
 def WCPG_TF(num, den):
-	# TODO: finish and add the test function
-	pass
+	"""Compute the WCPG from the numerator and denominator of the transfer function
+	num and den are numpy vectors or array of the right size"""
+	# get the sizes
+	Na = den.size
+	Nb = num.size
+	# get the pointer to the double arrays
+	pNum = num.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	pDen = den.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	# run the function to fill the empty array W
+	W = empty((1, 1), dtype=float64)
+	ret = _WCPGfunTF(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pNum, pDen, Nb, Na)
+	if ret == 0:
+		raise ValueError("Something went wrong during the WCPG evaluation...")
+
+	return mat(W)
 
 
 

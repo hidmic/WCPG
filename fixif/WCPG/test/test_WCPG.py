@@ -21,12 +21,16 @@ import pytest
 from numpy import array, zeros, absolute, eye, dot
 from numpy import matrix as mat
 from numpy.testing import assert_allclose
-from numpy.random.mtrand import rand, randn, randint
+from numpy.random.mtrand import rand, randn, randint, choice, random_sample
 from numpy.core.umath import pi, cos, sin
 from numpy.linalg import solve
 from numpy.linalg.linalg import LinAlgError
+from scipy.signal import butter
 
-from fixif.WCPG import WCPG_ABCD
+
+from fixif.WCPG import WCPG_ABCD, WCPG_TF
+
+
 
 def random_ABCD(n, p, q, pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDzero=0.5):
 	"""
@@ -124,7 +128,6 @@ def random_ABCD(n, p, q, pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDze
 
 	if rand() < pDzero:
 		Dmask = zeros((p, q))
-
 	else:
 		while True:
 			Dmask = rand(p, q) < pDmask
@@ -135,9 +138,9 @@ def random_ABCD(n, p, q, pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDze
 	# Apply masks.
 	B *= Bmask
 	C *= Cmask
-	#D *= Dmask
+	# D *= Dmask
 
-	return (A, B, C, D)
+	return A, B, C, D
 
 
 def iter_random_ABCD(number, n=(5, 10), p=(1, 5), q=(1, 5), pRepeat=0.01, pReal=0.5, pBCmask=0.90, pDmask=0.8, pDzero=0.5):
@@ -146,7 +149,7 @@ def iter_random_ABCD(number, n=(5, 10), p=(1, 5), q=(1, 5), pRepeat=0.01, pReal=
 	Returns:
 		- returns a generator of numpy matrices (A,B,C,D)  (to use in a for loop for example)
 	"""
-	for i in range(number):
+	for _ in range(number):
 		yield random_ABCD(randint(*n), randint(*p), randint(*q), pRepeat, pReal, pBCmask, pDmask, pDzero)
 
 
@@ -155,18 +158,18 @@ def WCPG_approx(A, B, C, D, nit):
 	spectral radius of A is too close to 1)
 	Only used to compare with true, reliable Anastasia's WCPG"""
 
-	sum = absolute(D)
+	acc = absolute(D)
 	powerA = mat(eye(A.shape[1]))
 
-	for i in range(0, nit):
-		sum += absolute(C * powerA * B)
+	for _ in range(0, nit):
+		acc += absolute(C * powerA * B)
 		powerA *= A
 
-	return sum
+	return acc
 
 
-@pytest.mark.parametrize( "S", iter_random_ABCD(20, (5, 30), (1, 5), (1, 5), pBCmask=0.1))
-def test_WCPG (S):
+@pytest.mark.parametrize("S", iter_random_ABCD(20, (5, 30), (1, 5), (1, 5), pBCmask=0.1))
+def test_WCPG(S):
 	"""
 	Tests for Worst-Case Peak Gain computation
 	Compare with a simple and bad approximation
@@ -174,9 +177,45 @@ def test_WCPG (S):
 	nit = 5000
 	rel_tol_wcpg = 1e-3
 
-	A,B,C,D = S
+	A, B, C, D = S
 	W = WCPG_ABCD(A, B, C, D)
-	wcpg = WCPG_approx(A,B,C,D, nit)
+	wcpg = WCPG_approx(A, B, C, D, nit)
 
 	assert_allclose(array(W), array(wcpg), rtol=rel_tol_wcpg)
+
+
+
+def random_TF(n=(5, 10), Wc=(0.1, 0.8), W1=(0.1, 0.5), W2=(0.5, 0.8)):
+	"""Generate one n-th order stable butterworth filter ((num, den) of the transfer function)"""
+	# choose a form
+	form = choice(['lowpass', 'highpass', 'bandpass', 'bandstop'])
+	# choose Wn
+	if form in ("bandpass", "bandstop"):
+		# choose 2 frequencies such that Wn2<=Wn1
+		Wn1 = (W1[1] - W1[0]) * random_sample() + W1[0]
+		Wn2 = (W2[1] - W2[0]) * random_sample() + W2[0]
+		while Wn2 <= Wn1:
+			Wn2 = (W2[1] - W2[0]) * random_sample() + W2[0]
+		W = [Wn1, Wn2]
+	else:
+		# choose 1 frequency
+		W = (Wc[1] - Wc[0]) * random_sample() + Wc[0]
+	# choose order
+	order = randint(*n)
+	num, den = butter(order, W, form)
+	return num, den
+
+
+def iter_random_TF(number, n=(5, 10), Wc=(0.1, 0.8), W1=(0.1, 0.5), W2=(0.5, 0.8)):
+	"""Generate some n-th order stable butterworth filter ((num, den) of the transfer function)"""
+	for _ in range(number):
+		yield random_TF(n, Wc, W1, W2)
+
+
+@pytest.mark.parametrize("TF", iter_random_TF(20, (5, 10), (0.1, 0.8), (0.1, 0.5), (0.5, 0.8)))
+def test_WCPG_TF(TF):
+
+	WCPG_TF(*TF)
+
+
 
