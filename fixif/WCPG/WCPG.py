@@ -55,8 +55,8 @@ def WCPG_ABCD(A, B, C, D):
 # -- WCPG_TF --
 # compute the WCPG from transfer function coefficients
 # int WCPG_tf_initial(double *W, double *num, double *denum, uint64_t Nb, uint64_t Na)
-_WCPGfunTF = _WCPGlib.WCPG_tf_initial
-_WCPGfunTF.argtypes = (3 * (ctypes.POINTER(ctypes.c_double),) + 2 * (ctypes.c_uint64,))
+_WCPGfunTF = _WCPGlib.WCPG_tf
+_WCPGfunTF.argtypes = (3 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,))
 
 
 def WCPG_TF(num, den):
@@ -71,7 +71,7 @@ def WCPG_TF(num, den):
 	pDen = den.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	# run the function to fill the empty array W
 	W = empty((1, 1), dtype=float64)
-	ret = _WCPGfunTF(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pNum, pDen, Nb, Na)
+	ret = _WCPGfunTF(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pNum, pDen, Nb, Na, 1)
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 
