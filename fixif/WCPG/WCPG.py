@@ -65,6 +65,7 @@ def WCPG_TF(num, den):
 	# get the sizes
 	Na = den.size
 	Nb = num.size
+
 	# get the pointer to the double arrays
 	pNum = num.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	pDen = den.ctypes.data_as(ctypes.POINTER(ctypes.c_double))

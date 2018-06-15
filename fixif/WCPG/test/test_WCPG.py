@@ -18,7 +18,7 @@ __status__ = "Beta"
 
 import pytest
 
-from numpy import array, zeros, absolute, eye, dot
+from numpy import array, zeros, absolute, eye, dot, diagflat, ones, fliplr, atleast_2d, r_
 from numpy import matrix as mat
 from numpy.testing import assert_allclose
 from numpy.random.mtrand import rand, randn, randint, choice, random_sample
@@ -214,8 +214,25 @@ def iter_random_TF(number, n=(5, 10), Wc=(0.1, 0.8), W1=(0.1, 0.5), W2=(0.5, 0.8
 
 @pytest.mark.parametrize("TF", iter_random_TF(20, (5, 10), (0.1, 0.8), (0.1, 0.5), (0.5, 0.8)))
 def test_WCPG_TF(TF):
+	rel_tol_wcpg = 1e-12
 
-	WCPG_TF(*TF)
+	order = len(TF[0])-1
+
+	num = mat(TF[0])
+	den = mat(TF[1])
 
 
+	A = mat(diagflat(ones((1, order - 1)), 1))
+	A[order - 1, :] = fliplr(-den[0, 1:])
+	B = mat(r_[zeros((order - 1, 1)), atleast_2d(1)])
+	C = mat(fliplr(num[0, 1:]) - fliplr(den[0, 1:]) * num[0, 0])
+	D = mat(atleast_2d(num[0, 0]))
+
+	W_ABCD = WCPG_ABCD(A, B, C, D)
+
+
+
+	W = WCPG_TF(num, den)
+
+	assert_allclose(array(W), array(W_ABCD), rtol=rel_tol_wcpg)
 
