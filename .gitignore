@@ -202,3 +202,10 @@ venv.bak/
 
 # PyCharm
 .idea/
+.pytest_cache/
+
+# unnecessary files
+exampleProgram/.deps
+exampleProgram/.libs
+exampleProgram/Makefile
+exampleProgram/exampleProgram
