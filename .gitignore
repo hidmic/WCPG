@@ -280,4 +280,6 @@ include/Makefile
 TestProgram/.deps
 config.h
 WCPG/Makefile
+libtool
+Makefile
 
