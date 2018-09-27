@@ -175,13 +175,13 @@ def test_WCPG(S):
 	Compare with a simple and bad approximation
 	"""
 	nit = 5000
-	rel_tol_wcpg = 1e-3
+	abs_tol_wcpg = 1e-3
 
 	A, B, C, D = S
 	W = WCPG_ABCD(A, B, C, D)
 	wcpg = WCPG_approx(A, B, C, D, nit)
 
-	assert_allclose(array(W), array(wcpg), rtol=rel_tol_wcpg)
+	assert_allclose(array(W), array(wcpg), atol=abs_tol_wcpg)
 
 
 
@@ -231,5 +231,5 @@ def test_WCPG_TF(TF):
 	# compute WCPG by two means, and compare them (WCPG_ABCD is tested independantely)
 	W_ABCD = WCPG_ABCD(A, B, C, D)
 	W = WCPG_TF(num, den)
-	assert_allclose(array(W), array(W_ABCD), rtol=rel_tol_wcpg)
+	assert_allclose(array(W), array(W_ABCD), atol=rel_tol_wcpg)
 
