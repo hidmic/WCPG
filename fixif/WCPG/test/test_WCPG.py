@@ -176,12 +176,13 @@ def test_WCPG(S):
 	"""
 	nit = 5000
 	abs_tol_wcpg = 1e-3
+	rel_tol_wcpg = 1e-2
 
 	A, B, C, D = S
 	W = WCPG_ABCD(A, B, C, D)
 	wcpg = WCPG_approx(A, B, C, D, nit)
 
-	assert_allclose(array(W), array(wcpg), atol=abs_tol_wcpg)
+	assert_allclose(array(W), array(wcpg), atol=abs_tol_wcpg, rtol=rel_tol_wcpg)
 
 
 
