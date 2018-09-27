@@ -274,3 +274,10 @@ exampleProgram/.deps
 exampleProgram/.libs
 exampleProgram/Makefile
 exampleProgram/exampleProgram
+TestProgram/.libs
+TestProgram/Makefile
+include/Makefile
+TestProgram/.deps
+config.h
+WCPG/Makefile
+
