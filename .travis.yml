@@ -43,7 +43,7 @@ install:
     fi
   # install WCPG library
   - sh autogen.sh && ./configure && make -j&& sudo make install;
-  - export export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib;
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib;
   # install required python packages for build and coverage
   - pip install pytest
   - pip install pytest-cov
