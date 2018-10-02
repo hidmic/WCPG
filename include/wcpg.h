@@ -61,6 +61,25 @@ extern "C" {
 #include <limits.h>
 #include <mpfr.h>
 
+
+
+/* @brief Structure wcpg_result contains the information that will be saved after WCPG computation */
+typedef struct
+{
+	int N;                      /* number of iterations */
+	double one_minus_rhoA;      /* 1-rho(A) where rho(A) is the spectral radius of A */
+	double maxSN;
+	double minSN;
+	double time_overall;
+	double time_Ncomp;
+	double time_Summation;
+	int inversion_Iter;
+	uint64_t maxprec_PN;
+	uint64_t maxprec_U;
+	uint64_t maxprec_SN;
+}wcpg_result_out;
+
+
 /** @brief For an LTI filter given in its State-Space representation {A,B,C,D},
 where A is n*n, B is n*q, C is p*n and D is p*q real matrix the function 
 returns integer value indicating if WCPG was successfully computed.
@@ -74,6 +93,13 @@ Output:
 	integer value equal to 1 if WCPG computation is successful and 0 otherwise.
  */
 int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q);
+
+
+/** @brief Same function as WCPG_ABCD, but with a wcpg_result_out structure that gives informations about
+the time, number of iterations, etc.
+*/
+int WCPG_ABCD_res(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q, wcpg_result_out* res);
+
 
 /* For an LTI filter given in its State-Space representation {A,B,C,D},
 where A is n*n, B is n*q, C is p*n and D is p*q double precision real matrix the function

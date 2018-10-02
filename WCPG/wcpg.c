@@ -97,7 +97,7 @@ void wcpg_result_print(FILE *stream, wcpg_result *result, size_t ndigits)
 	mpfr_out_str(stream, (int)10, ndigits, result->minSN, MPFR_RNDN );
 	fprintf(stream, "\nOverall time spent: %.2f \n", result->time_overall );
 	fprintf(stream, "N computation time: %.2f \n", result->time_Ncomp );
-	fprintf(stream, "Summation time: %.2f \n", result->time_Summation );
+	fprintf(stream, ": %.2f \n", result->time_Summation );
 	fprintf(stream, "Maximum precision of U = inv(V): %ld \n", result->maxprec_U );
 	fprintf(stream, "Maximum precision of P_N: %ld \n", result->maxprec_PN );
 	fprintf(stream, "Maximum precision of S_N: %ld \n", result->maxprec_SN );
@@ -319,12 +319,10 @@ void getDeltaOfWCPG(mpfr_t *reS, uint64_t p, uint64_t q, wcpg_result *result)
 
 
 
-/* For an LTI filter given in its State-Space representation {A,B,C,D},
-where A is n*n, B is n*q, C is p*n and D is p*q real matrix the function
-returns integer value indicating if WCPG is successfully computed.
-The function takes eps, a desired absolute error bound on the computed WCPG measure.
-In p*q MPFR matrix W the Worst-Case peak gain is stored if algorithm successfully exited. */
-int WCPG_ABCD_mprec(mpfr_t *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q, mpfr_t mpeps)
+
+
+/* same as WCPG_ABCD_mprec, but the result structure is filled if not NULL */
+int WCPG_ABCD_mprec_res(mpfr_t *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q, mpfr_t mpeps, wcpg_result_out* result)
 {
 	mpfr_prec_t prec = 106;
 	int i;
@@ -418,20 +416,48 @@ int WCPG_ABCD_mprec(mpfr_t *W, double *A, double *B, double *C, double *D, uint6
 			return 0;
 		}
 
-		wcpg_result result;
+		wcpg_result fullresult;
 
+		int res = WCPG(W, reA, reB, reC, reD, mpeps, n, p, q, &fullresult);
 
-		int res = WCPG(W, reA, reB, reC, reD, mpeps, n, p, q, &result);
-
-		wcpg_result_clear(&result);
+		/* convert the result */
+		if (result != NULL)
+		{
+			/* copy the full result into the wcpg_result_out */
+			result->N = fullresult.N;
+			result->one_minus_rhoA = mpfr_get_d(fullresult.one_minus_rhoA, MPFR_RNDN);
+			result->maxSN = mpfr_get_d(fullresult.maxSN, MPFR_RNDN);
+			result->minSN = mpfr_get_d(fullresult.minSN, MPFR_RNDN);;
+			result->time_overall = fullresult.time_overall;
+			result->time_Ncomp = fullresult.time_Ncomp;
+			result->time_Summation = fullresult.time_Summation;
+			result->inversion_Iter = fullresult.inversion_Iter;
+			result->maxprec_PN = fullresult.maxprec_PN;
+			result->maxprec_U = fullresult.maxprec_U;
+			result->maxprec_SN = fullresult.maxprec_SN;
+		}
+		/* clean the full result */
+		wcpg_result_clear(&fullresult);
+		/* free the matrices */
 		freeMPFRMatrix(reA, n, n);
 		freeMPFRMatrix(reB, n, q);
 		freeMPFRMatrix(reC, p, n);
 		freeMPFRMatrix(reD, p, q);
+
 		return res;
-
-
 }
+/* For an LTI filter given in its State-Space representation {A,B,C,D},
+where A is n*n, B is n*q, C is p*n and D is p*q real matrix the function
+returns integer value indicating if WCPG is successfully computed.
+The function takes eps, a desired absolute error bound on the computed WCPG measure.
+In p*q MPFR matrix W the Worst-Case peak gain is stored if algorithm successfully exited. */
+int WCPG_ABCD_mprec(mpfr_t *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q, mpfr_t mpeps)
+{
+	return WCPG_ABCD_mprec_res(W, A, B, C, D, n, p, q, mpeps, NULL);
+}
+
+
+
 
 int WCPG_mp(mpfr_t *Sk, mpfr_t *A, mpfr_t *B, mpfr_t *C, mpfr_t *D, uint64_t n, uint64_t p, uint64_t q, mpfr_t mpeps)
 {
@@ -1465,9 +1491,12 @@ returns integer value indicating if WCPG is successfully computed.
 In p*q matrix W the Worst-Case peak gain is stored if algorithm successfully exited. */
 int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
 {
+	return WCPG_ABCD_res(W, A, B, C, D, n, p, q, NULL);
+}
+
+int WCPG_ABCD_res(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q, wcpg_result_out* res)
+{
 	int flag = 0;
-
-
 
 	mpfr_t *S;
 	S = allocateMPFRMatrix(p, q, 64);
@@ -1478,7 +1507,7 @@ int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n,
 	mpfr_set_str(mpeps, "1e-53", 2, MPFR_RNDN);
 
 
-	if (!WCPG_ABCD_mprec(S, A, B, C, D, n, p, q, mpeps))
+	if (!WCPG_ABCD_mprec_res(S, A, B, C, D, n, p, q, mpeps, res))
 	{
 		freeMPFRMatrix(S, p, q);
 		mpfr_clear(mpeps);
@@ -1502,6 +1531,10 @@ int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n,
 	}
 
 }
+
+
+
+
 
 /* 
 	This function computes the WCPG of a SISO filter represented with its transfer function.

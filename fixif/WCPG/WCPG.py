@@ -19,6 +19,25 @@ import ctypes
 import ctypes.util
 from numpy import empty, float64, mat
 
+
+
+class wcpg_result(ctypes.Structure):
+	_fields_ = [('N', ctypes.c_int),                    # number of iterations
+		('one_minus_rhoA', ctypes.c_double),    # 1 - rho(A) where rho(A) is the spectral radius of A
+		('maxSN', ctypes.c_double),             # max(S_N)
+	    ('minSN', ctypes.c_double),             # min(S_N)
+		('time_overall', ctypes.c_double),       # Overall time spent
+		('time_Ncomp', ctypes.c_double),         # computation time
+		('time_Summation', ctypes.c_double),     # Summation time
+		('inversion_Iter', ctypes.c_int),     # Inversion iterations
+		('maxprec_PN', ctypes.c_uint64),         # Maximum precision of U = inv(V)
+		('maxprec_U', ctypes.c_uint64),         # Maximum precision of P_N
+		('maxprec_SN', ctypes.c_uint64)]        # Maximum precision of S_N
+
+	def getdict(self):
+		return dict((field, getattr(self, field)) for field, _ in self._fields_)
+
+
 # load the WCPG library, if installed
 if not ctypes.util.find_library('wcpg'):
 	raise ValueError("The WCPG library cannot be found (is it installed?")
@@ -28,8 +47,8 @@ _WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
 # -- WCPG_ABCD --
 # compute the WCPG from state-space matrices
 # int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
-_WCPGfunABCD = _WCPGlib.WCPG_ABCD
-_WCPGfunABCD.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,))
+_WCPGfunABCD = _WCPGlib.WCPG_ABCD_res
+_WCPGfunABCD.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,) + (ctypes.POINTER(wcpg_result),))
 
 
 def WCPG_ABCD(A, B, C, D):
@@ -43,9 +62,13 @@ def WCPG_ABCD(A, B, C, D):
 	pB = B.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	pC = C.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	pD = D.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	# get the result
+	res = wcpg_result()
 	# run the function to fill the empty array W
 	W = empty((p, q), dtype=float64)
-	ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q)
+	ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q, ctypes.pointer(res))
+
+	print(res.getdict())
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 

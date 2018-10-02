@@ -74,11 +74,10 @@ extern "C" {
 #include "mpfi_matrix.h"
 
 
-//Structure wcpg_result contains the information that will be saved after WCPG computation
 typedef struct wcpg_result_struct
 {
 	int N;
-	mpfr_t one_minus_rhoA;	
+	mpfr_t one_minus_rhoA;
 	mpfr_t maxSN;
 	mpfr_t minSN;
 	double time_overall;
@@ -88,9 +87,9 @@ typedef struct wcpg_result_struct
 	mpfr_prec_t maxprec_PN;
 	mpfr_prec_t maxprec_U;
 	mpfr_prec_t maxprec_SN;
-
-
 }wcpg_result;
+
+
 
 void wcpg_result_init(wcpg_result *result);
 void wcpg_result_clear(wcpg_result *result);
