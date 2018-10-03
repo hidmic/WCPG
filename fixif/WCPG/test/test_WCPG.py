@@ -28,7 +28,7 @@ from numpy.linalg.linalg import LinAlgError
 from scipy.signal import butter
 
 
-from fixif.WCPG import WCPG_ABCD, WCPG_TF
+from fixif.WCPG import WCPG_ABCD, WCPG_TF, WCPG_ABCD_res
 
 
 
@@ -174,16 +174,18 @@ def test_WCPG(S):
 	Tests for Worst-Case Peak Gain computation
 	Compare with a simple and bad approximation
 	"""
-	nit = 5000
-	abs_tol_wcpg = 1e-3
-	rel_tol_wcpg = 1e-2
+
+	abs_tol_wcpg = 1e-4
+	rel_tol_wcpg = 1e-4
 
 	A, B, C, D = S
-	W = WCPG_ABCD(A, B, C, D)
+	W1 = WCPG_ABCD(A, B, C, D)
+	W2, res = WCPG_ABCD_res(A, B, C, D)
+	nit = res["N"]
 	wcpg = WCPG_approx(A, B, C, D, nit)
 
-	assert_allclose(array(W), array(wcpg), atol=abs_tol_wcpg, rtol=rel_tol_wcpg)
-
+	assert_allclose(array(W1), array(wcpg), atol=abs_tol_wcpg, rtol=rel_tol_wcpg)
+	assert_allclose(array(W1), array(W2), atol=abs_tol_wcpg, rtol=rel_tol_wcpg)
 
 
 def random_TF(n=(5, 10), Wc=(0.1, 0.8), W1=(0.1, 0.5), W2=(0.5, 0.8)):

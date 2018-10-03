@@ -46,9 +46,12 @@ _WCPGlib = ctypes.CDLL(ctypes.util.find_library('wcpg'))
 
 # -- WCPG_ABCD --
 # compute the WCPG from state-space matrices
-# int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q)
-_WCPGfunABCD = _WCPGlib.WCPG_ABCD_res
-_WCPGfunABCD.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,) + (ctypes.POINTER(wcpg_result),))
+# int WCPG_ABCD(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q);
+# int WCPG_ABCD_res(double *W, double *A, double *B, double *C, double *D, uint64_t n, uint64_t p, uint64_t q, wcpg_result_out* res);
+_WCPGfunABCD = _WCPGlib.WCPG_ABCD
+_WCPGfunABCD.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,))
+_WCPGfunABCD_res = _WCPGlib.WCPG_ABCD_res
+_WCPGfunABCD_res.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,) + (ctypes.POINTER(wcpg_result),))
 
 
 def WCPG_ABCD(A, B, C, D):
@@ -62,17 +65,38 @@ def WCPG_ABCD(A, B, C, D):
 	pB = B.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	pC = C.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 	pD = D.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-	# get the result
-	res = wcpg_result()
 	# run the function to fill the empty array W
 	W = empty((p, q), dtype=float64)
-	ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q, ctypes.pointer(res))
+	ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q)
 
-	print(res.getdict())
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 
 	return mat(W)
+
+
+def WCPG_ABCD_res(A, B, C, D):
+	"""Compute the WCPG from the matrices A, B, C, D
+	A,B,C and D are numpy matrices or array of the right size
+	returns the WCPG and some informations about the result (dictionary)"""
+	# get the sizes
+	n = A.shape[1]
+	p, q = D.shape
+	# get the pointer to the double arrays
+	pA = A.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	pB = B.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	pC = C.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	pD = D.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	# get the result
+	res = wcpg_result()
+	# run the function to fill the empty array W
+	W = empty((p, q), dtype=float64)
+	ret = _WCPGfunABCD_res(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q, ctypes.pointer(res))
+
+	if ret == 0:
+		raise ValueError("Something went wrong during the WCPG evaluation...")
+
+	return mat(W), res.getdict()
 
 
 # -- WCPG_TF --
