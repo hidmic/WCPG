@@ -23,10 +23,10 @@ before_install:
     else
       brew update;
       brew upgrade python;
+      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH;
       alias pip="pip3";
       pip --version;
-      pip install --upgrade pip setuptools wheel;
-      PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH;
+      pip3 install --upgrade pip setuptools wheel;
     fi
 
 install:
