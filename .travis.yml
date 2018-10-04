@@ -21,9 +21,11 @@ before_install:
       sudo apt-get -qq update || travis_terminate 1;
       pip install --upgrade setuptools;
     else
-      alias pip="pip3";
       brew update;
       brew upgrade python;
+      alias pip="pip3";
+      pip --version;
+      pip install --upgrade pip setuptools wheel;
       PATH=/usr/local/opt/bison/bin:/usr/local/opt/python/libexec/bin:$PATH;
     fi
 
