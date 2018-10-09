@@ -20,7 +20,6 @@ import ctypes.util
 from numpy import empty, float64, mat
 
 
-
 class wcpg_result(ctypes.Structure):
 	_fields_ = [('N', ctypes.c_int),                    # number of iterations
 		('one_minus_rhoA', ctypes.c_double),    # 1 - rho(A) where rho(A) is the spectral radius of A
@@ -54,31 +53,10 @@ _WCPGfunABCD_res = _WCPGlib.WCPG_ABCD_res
 _WCPGfunABCD_res.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,) + (ctypes.POINTER(wcpg_result),))
 
 
-def WCPG_ABCD(A, B, C, D):
-	"""Compute the WCPG from the matrices A, B, C, D
-	A,B,C and D are numpy matrices or array of the right size"""
-	# get the sizes
-	n = A.shape[1]
-	p, q = D.shape
-	# get the pointer to the double arrays
-	pA = A.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-	pB = B.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-	pC = C.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-	pD = D.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-	# run the function to fill the empty array W
-	W = empty((p, q), dtype=float64)
-	ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q)
-
-	if ret == 0:
-		raise ValueError("Something went wrong during the WCPG evaluation...")
-
-	return mat(W)
-
-
-def WCPG_ABCD_res(A, B, C, D):
+def WCPG_ABCD(A, B, C, D, result_info = None):
 	"""Compute the WCPG from the matrices A, B, C, D
 	A,B,C and D are numpy matrices or array of the right size
-	returns the WCPG and some informations about the result (dictionary)"""
+	if res is given, this dictionary is filled with result information"""
 	# get the sizes
 	n = A.shape[1]
 	p, q = D.shape
@@ -91,12 +69,16 @@ def WCPG_ABCD_res(A, B, C, D):
 	res = wcpg_result()
 	# run the function to fill the empty array W
 	W = empty((p, q), dtype=float64)
-	ret = _WCPGfunABCD_res(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q, ctypes.pointer(res))
-
+	if result_info is None:
+		ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q)
+	else:
+		ret = _WCPGfunABCD_res(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q, ctypes.pointer(res))
+		result_info.update (res.getdict())
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 
-	return mat(W), res.getdict()
+	return mat(W)
+
 
 
 # -- WCPG_TF --
