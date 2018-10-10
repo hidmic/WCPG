@@ -53,7 +53,7 @@ _WCPGfunABCD_res = _WCPGlib.WCPG_ABCD_res
 _WCPGfunABCD_res.argtypes = (5 * (ctypes.POINTER(ctypes.c_double),) + 3 * (ctypes.c_uint64,) + (ctypes.POINTER(wcpg_result),))
 
 
-def WCPG_ABCD(A, B, C, D, result_info = None):
+def WCPG_ABCD(A, B, C, D, result_info=None):
 	"""Compute the WCPG from the matrices A, B, C, D
 	A,B,C and D are numpy matrices or array of the right size
 	if res is given, this dictionary is filled with result information"""
@@ -73,7 +73,7 @@ def WCPG_ABCD(A, B, C, D, result_info = None):
 		ret = _WCPGfunABCD(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q)
 	else:
 		ret = _WCPGfunABCD_res(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), pA, pB, pC, pD, n, p, q, ctypes.pointer(res))
-		result_info.update (res.getdict())
+		result_info.update(res.getdict())
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 

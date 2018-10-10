@@ -28,7 +28,7 @@ from numpy.linalg.linalg import LinAlgError
 from scipy.signal import butter
 
 
-from fixif.WCPG import WCPG_ABCD, WCPG_TF, WCPG_ABCD_res
+from fixif.WCPG import WCPG_ABCD, WCPG_TF
 
 
 
@@ -180,7 +180,8 @@ def test_WCPG(S):
 
 	A, B, C, D = S
 	W1 = WCPG_ABCD(A, B, C, D)
-	W2, res = WCPG_ABCD_res(A, B, C, D)
+	res = {}
+	W2 = WCPG_ABCD(A, B, C, D, res)
 	nit = res["N"]
 	wcpg = WCPG_approx(A, B, C, D, nit)
 
