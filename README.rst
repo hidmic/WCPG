@@ -1,6 +1,6 @@
 ====
 WCPG
-===
+====
 
 WCPG library provides functions for a reliable evaluation of the Worst-Case Peak Gain matrix of a discrete-time LTI filter.
 

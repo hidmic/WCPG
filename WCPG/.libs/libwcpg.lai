@@ -17,7 +17,7 @@ old_library='libwcpg.a'
 inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
-dependency_libs=' -lm -llapack -lblas -lmpfi -lmpfr -lgmp'
+dependency_libs=' -lm -llapacke -lblas -L/usr/local/opt/openblas/lib -L/usr/local/opt/lapack/lib /usr/local/lib/libmpfi.la /usr/local/lib/libmpfr.la /usr/local/lib/libgmp.la'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''

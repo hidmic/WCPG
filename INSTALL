@@ -1,3 +1,4 @@
+
 WCPG library provides functions for a reliable evaluation of the Worst-Case Peak Gain matrix of a LTI filter. 
 
 In order to compile the software you will need the following packages
@@ -32,6 +33,8 @@ Please use
 ./configure --help
 
 to get an overview over the different switches.
+
+Known problem: have to ensure that /usr/local/include is in the $CFLAGS to find f2c.h
 
 The WCPG library can be installed with command
 
