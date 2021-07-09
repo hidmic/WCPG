@@ -17,7 +17,7 @@ __status__ = "Beta"
 
 import ctypes
 import ctypes.util
-from numpy import empty, float64, mat
+from numpy import empty, float64
 
 
 class wcpg_result(ctypes.Structure):
@@ -77,7 +77,7 @@ def WCPG_ABCD(A, B, C, D, result_info=None):
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 
-	return mat(W)
+	return W
 
 
 
@@ -104,7 +104,7 @@ def WCPG_TF(num, den):
 	if ret == 0:
 		raise ValueError("Something went wrong during the WCPG evaluation...")
 
-	return mat(W)
+	return W
 
 
 
