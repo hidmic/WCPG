@@ -182,7 +182,7 @@ int lowerBoundN(mpfi_t *rePhi, mpfi_t *imPhi, mpfi_t *rePsi, mpfi_t *imPsi, \
 	mpfi_t denum;				
 	mpfi_init2(denum, prec);
 	mpfi_log2(denum, rho);		
-	mpfi_abs(denum, denum);		//denum = abs(log2(rho));
+	//mpfi_abs(denum, denum);		//denum = abs(log2(rho));
 
 
 	if(!mpfi_bounded_p(denum))
@@ -198,10 +198,10 @@ int lowerBoundN(mpfi_t *rePhi, mpfi_t *imPhi, mpfi_t *rePsi, mpfi_t *imPsi, \
 	reRl = allocateMPFIMatrix(p, q, prec);
 	imRl = allocateMPFIMatrix(p, q, prec);
 
-	mpfi_t Mij, min;
-	mpfi_init2(min, prec);
+	mpfi_t Mij, max;
+	mpfi_init2(max, prec);
 	mpfi_init2(Mij, prec);
-	mpfi_set_ui(min, (unsigned long int)INT_MAX);
+	mpfi_set_si(max, (long int)INT_MIN);
 
 	int l, i, j;
 	for(l = 0; l < n; ++l)
@@ -222,9 +222,9 @@ int lowerBoundN(mpfi_t *rePhi, mpfi_t *imPhi, mpfi_t *rePsi, mpfi_t *imPsi, \
 
 				mpfi_mul(Mij, K, scratch1);		// M(i,j) = K * abs(R_l(i,j))
 
-				if(mpfi_cmp(Mij, min) < 0 && mpfi_get_d(Mij))
+				if(mpfi_cmp(Mij, max) > 0) // && mpfi_get_d(Mij))
 				{
-					mpfi_set(min, Mij);
+					mpfi_set(max, Mij);
 
 				}
 
@@ -233,13 +233,13 @@ int lowerBoundN(mpfi_t *rePhi, mpfi_t *imPhi, mpfi_t *rePsi, mpfi_t *imPsi, \
 	}
 
 	// so now we know the norm_min of matrix M: min = norm(M)_min;
-	mpfi_fr_div(scratch1, eps, min);  //scratch1 = eps / norm(M)_min
+	mpfi_fr_div(scratch1, eps, max);  //scratch1 = eps / norm(M)_min
 	mpfi_log2(scratch1, scratch1);	// scratch1 = log2(eps / norm(M)_min)
 
 
 
 	mpfi_div(scratch2, scratch1, denum); //scratch2 = scratch1 / denum = log2(eps / norm(M)_min) / log2(rho(A))
-	mpfi_abs(scratch2, scratch2);
+	//mpfi_abs(scratch2, scratch2);
 
 
 
@@ -259,7 +259,7 @@ int lowerBoundN(mpfi_t *rePhi, mpfi_t *imPhi, mpfi_t *rePsi, mpfi_t *imPsi, \
 	mpfi_clear(denum);
 	mpfi_clear(K);
 	mpfi_clear(Mij);
-	mpfi_clear(min);
+	mpfi_clear(max);
 	mpfr_clear(Nsup);
 	mpfr_clear(rhofr);
 	freeMPFIMatrix(scratchVector2, 1, 2);
