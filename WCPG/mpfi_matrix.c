@@ -520,8 +520,8 @@ computes its absolute value.
 The funciton requires a scratch space of size 1, assumed to be preallocated outside the function. */
 void mpfi_abs_complex(mpfi_t absA, mpfi_t reA, mpfi_t imA, mpfi_t scratch)
 {
-	mpfi_mul(absA, reA, reA);
-	mpfi_mul(scratch, imA, imA);
+	mpfi_sqr(absA, reA);
+	mpfi_sqr(scratch, imA);
 	mpfi_add(absA, absA, scratch);
 	mpfi_sqrt(absA, absA);
 }
